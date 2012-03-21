@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Media Temple Server Status ===
 Contributors: andrewryno
 Donate link: http://andrewryno.com/plugins/media-temple-server-status/
 Tags: mediatemple, server, stats, statistics, ve, mt
