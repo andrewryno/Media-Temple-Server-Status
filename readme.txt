@@ -3,8 +3,8 @@ Contributors: andrewryno
 Donate link: http://andrewryno.com/plugins/media-temple-server-status/
 Tags: mediatemple, server, stats, statistics, ve, mt
 Requires at least: 3.3
-Tested up to: 3.3
-Stable tag: 1.0
+Tested up to: 3.3.1
+Stable tag: 1.0.1
 
 This plugin places a widget on the WordPress admin dashboard giving you a brief overview of your (mt) server status.
 
@@ -39,6 +39,8 @@ date ranges as well.
 
 == Changelog ==
 
+= 1.0.1 =
+* Added a check to see if cURL is installed on the server since it is used for the (mt) API.
 = 1.0 =
 * First Release
 

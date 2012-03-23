@@ -9,6 +9,15 @@ Author URI: http://andrewryno.com
 License: GPLv2
 */
 
+function mtss_curl_check() {
+	if  ( in_array( 'curl', get_loaded_extensions() ) ) {
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
 register_uninstall_hook( __FILE__, 'mtss_uninstall_hook' );
 
 add_action( 'admin_menu', 'mtss_plugin_menu' );
@@ -24,6 +33,11 @@ function mtss_dashboard_widget() {
 	$mtss_service_id = (int) get_option( 'mtss_service_id' );
 	if ( empty( $mtss_api_key ) OR empty( $mtss_service_id ) ) {
 		echo 'Your (mt) API key and/or service ID are not set. <a href="' . get_admin_url() . 'options-general.php?page=mediatemple-server-stats">Enter them here!</a>';
+		return;
+	}
+	
+	if ( ! mtss_curl_check() ) {
+		echo 'You must have cURL enabled on your server in order to use this plugin.';
 		return;
 	}
 	
@@ -90,6 +104,17 @@ function mtss_plugin_menu() {
 function mtss_plugin_options() {
 	if ( ! current_user_can( 'manage_options' ))  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+	}
+	
+	if ( ! mtss_curl_check() ) {
+		?>
+		<div class="wrap">
+			<div id="icon-options-general" class="icon32"><br></div>
+			<h2>(mt) Server Stats Options</h2>
+			<p>You must have cURL enabled on your server in order to use this plugin.</p>
+		</div>
+		<?php
+		return;
 	}
 	
 	// Check to see if the form was submitted
