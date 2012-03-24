@@ -3,28 +3,16 @@
 Plugin Name: Media Temple Server Status
 Plugin URI: http://andrewryno.com/plugins/media-temple-server-status/
 Description: A dashboard widget that displays server status information for Media Temple servers.
-Version: 1.0
+Version: 1.1
 Author: Andrew Ryno
 Author URI: http://andrewryno.com
 License: GPLv2
 */
 
-function mtss_curl_check() {
-	if  ( in_array( 'curl', get_loaded_extensions() ) ) {
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-
 register_uninstall_hook( __FILE__, 'mtss_uninstall_hook' );
 
 add_action( 'admin_menu', 'mtss_plugin_menu' );
 add_action( 'wp_dashboard_setup', 'mtss_add_dashboard_widgets' );
-
-// Include the (mt) PHP API by Nathan Le Ray (modifications by Andrew Ryno)
-require plugin_dir_path( __FILE__ ) . '/MtAPI.php';
 
 // Display the Google Chart with (mt) server data on the dashboard
 function mtss_dashboard_widget() {
@@ -36,14 +24,9 @@ function mtss_dashboard_widget() {
 		return;
 	}
 	
-	if ( ! mtss_curl_check() ) {
-		echo 'You must have cURL enabled on your server in order to use this plugin.';
-		return;
-	}
-	
-	// Create a new instance of the API and get the stats for the last hour
-	$mt = new MtAPI( $mtss_api_key, $mtss_service_id );
-	$range_stats = $mt->get_predefined_range_stats( '1hour', array( 'cpu', 'memory', 'processes' ) );
+	// Get the results from the API
+	$mt = json_decode( file_get_contents( 'https://api.mediatemple.net/api/v1/stats/' . $mtss_service_id . '/1hour.json?apikey=' . $mtss_api_key ) );
+	$range_stats = $mt->statsList;
 	?>
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript">
@@ -106,17 +89,6 @@ function mtss_plugin_options() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 	
-	if ( ! mtss_curl_check() ) {
-		?>
-		<div class="wrap">
-			<div id="icon-options-general" class="icon32"><br></div>
-			<h2>(mt) Server Stats Options</h2>
-			<p>You must have cURL enabled on your server in order to use this plugin.</p>
-		</div>
-		<?php
-		return;
-	}
-	
 	// Check to see if the form was submitted
     if ( isset( $_POST['submit'] )) {
         update_option( 'mtss_api_key', $_POST['mtss_api_key'] );
@@ -133,8 +105,8 @@ function mtss_plugin_options() {
     
     // Allow the user to select services from a dropdown instead of inputting it themselves
 	if ( ! empty( $mtss_api_key ) ) {
-    	$mt = new MtAPI( $mtss_api_key );
-	    $services = $mt->get_services_list();
+		$mt = json_decode( file_get_contents( 'https://api.mediatemple.net/api/v1/services.json?apikey=' .$mtss_api_key ) );
+		$services = $mt->services;
     }
 	?>
 	<div class="wrap">
